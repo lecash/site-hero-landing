@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description"
+    content="Base canônica para landing pages: Vite vanilla, arquitetura limpa, zero dependências ocultas. Performance real desde o primeiro build." />
+
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Site Hero — Landing Pages de Alta Performance" />
+  <meta property="og:description"
+    content="Base canônica para landing pages: Vite vanilla, arquitetura limpa, zero dependências ocultas." />
+  <meta property="og:site_name" content="Site Hero" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Site Hero — Landing Pages de Alta Performance" />
+  <meta name="twitter:description" content="Base canônica para landing pages com Vite vanilla e performance real." />
+
+  <title>Site Hero — Landing Pages de Alta Performance</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+</head>
+
+<body>
+  <!-- SKIP LINK (Accessibility) -->
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+
+  <!-- LOADER OVERLAY -->
+  <div id="appLoader" class="loader" aria-live="polite" aria-busy="true">
+    <div class="loaderCard">
+      <div class="loaderLogo">SITE</div>
+      <div class="loaderSpinner" aria-hidden="true"></div>
+      <div class="loaderText">Carregando…</div>
+    </div>
+  </div>
+
+  <header class="siteHeader">
+    <div class="scrollBar" aria-hidden="true"></div>
+    <div class="container headerGrid">
+      <strong class="brand">SITE</strong>
+      <nav class="nav">
+        <a href="#features">Features</a>
+        <a href="#cta">Começar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="heroBg" aria-hidden="true"></div>
+
+      <div class="container heroGrid">
+        <div class="heroCopy stagger">
+          <h1>Construa landing pages que convertem.</h1>
+          <p>
+            Arquitetura limpa, performance real e zero dependências ocultas.
+            Comece com fundação sólida, não com framework inchado.
+          </p>
+          <a class="cta" href="#cta">Ver como funciona</a>
+        </div>
+      </div>
+      <div class="scroll-indicator" aria-hidden="true"></div>
+    </section>
+
+    <!-- CINEMATIC SCROLL (Rockstar-style) -->
+    <section class="cinematic" id="cinematic">
+      <div class="cinematicSticky">
+        <video id="scrubVideo" class="cinematicVideo" preload="metadata" muted playsinline
+          aria-label="Vídeo controlado pelo scroll">
+          <source src="/vice.mp4" type="video/mp4" />
+        </video>
+
+        <div class="cinematicOverlay">
+          <div class="cinematicCard">
+            <p class="cinematicKicker" id="cinKicker">Vice City, USA.</p>
+            <h2 class="cinematicTitle" id="cinTitle">O scroll controla a cena.</h2>
+            <p class="cinematicText" id="cinText">
+              Você rola e o vídeo avança. Sem botão play. Sem frescura.
+            </p>
+
+            <div class="cinematicActions">
+              <a class="cta cinBtn" href="#features">Continuar</a>
+              <button class="cinBtn ghost" id="rewatchBtn" type="button">Rever</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="features">
+      <div class="container">
+        <h2 class="reveal">Por que esta base funciona</h2>
+        <div class="featuresGrid">
+          <article class="reveal">
+            <h3>Arquitetura previsível</h3>
+            <p>Estrutura clara e auditável. Sem magia, sem surpresas no build.</p>
+          </article>
+          <article class="reveal">
+            <h3>Performance nativa</h3>
+            <p>Vite vanilla puro. Carrega rápido, compila rápido, entrega rápido.</p>
+          </article>
+          <article class="reveal">
+            <h3>Escalável sem refatoração</h3>
+            <p>Cresce com seu projeto sem forçar reescrita ou migração traumática.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="cta" class="finalCta">
+      <div class="container">
+        <h2 class="reveal">Comece do jeito certo.</h2>
+        <p class="reveal">Fundação sólida agora significa menos retrabalho depois.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>© <span id="year"></span> Site Hero</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
