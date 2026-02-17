@@ -1,0 +1,12 @@
+{
+  "name": "hero-landing-page",
+  "version": "1.0.0",
+  "description": "A simple hero landing page with tests",
+  "main": "index.html",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": ["landing-page", "hero", "html", "css"],
+  "author": "",
+  "license": "MIT"
+}
