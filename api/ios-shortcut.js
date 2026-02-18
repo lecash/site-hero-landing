@@ -53,6 +53,52 @@ export default async function handler(req, res) {
             };
             break;
 
+        case 'run-pc': {
+            // Chama o agente local no PC via ngrok
+            const agentUrl = process.env.PC_AGENT_URL;
+            if (!agentUrl) {
+                return res.status(503).json({
+                    error: 'Agente PC não configurado.',
+                    hint: 'Configure a variável PC_AGENT_URL na Vercel com a URL do ngrok.',
+                });
+            }
+            try {
+                const agentRes = await fetch(`${agentUrl}/run`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cmd: content, secret }),
+                });
+                const agentData = await agentRes.json();
+                if (!agentRes.ok) {
+                    return res.status(agentRes.status).json(agentData);
+                }
+                message = agentData.output || agentData;
+            } catch (err) {
+                return res.status(502).json({
+                    error: 'Não foi possível conectar ao agente PC.',
+                    detail: err.message,
+                    hint: 'Verifique se o agente está rodando e o ngrok está ativo.',
+                });
+            }
+            break;
+        }
+
+        case 'pc-ping': {
+            // Verifica se o agente PC está online
+            const agentUrl = process.env.PC_AGENT_URL;
+            if (!agentUrl) {
+                return res.status(503).json({ error: 'PC_AGENT_URL não configurada.' });
+            }
+            try {
+                const pingRes = await fetch(`${agentUrl}/ping`);
+                const pingData = await pingRes.json();
+                message = pingData.ok ? '✅ PC online!' : '❌ PC offline.';
+            } catch {
+                message = '❌ PC offline ou ngrok inativo.';
+            }
+            break;
+        }
+
         default:
             return res.status(400).json({ error: `Ação desconhecida: ${action}` });
     }
