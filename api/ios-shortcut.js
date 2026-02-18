@@ -14,12 +14,25 @@ export default function handler(req, res) {
         return;
     }
 
-    const { text = '', action = 'analyze' } = req.query;
+    // normaliza os parametros de entrada (suporta query string ou body JSON)
+    let text = req.query.text || '';
+    let action = req.query.action || 'analyze';
 
-    if (!text && req.method === 'GET') {
+    // Se for POST/PUT/PATCH, tenta pegar do corpo
+    if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
+        // Vercel serverless functions parseiam JSON automaticamente se o header Content-Type for application/json
+        // Mas garantimos aqui caso venha diferente
+        const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+        if (body.text) text = body.text;
+        if (body.action) action = body.action;
+    }
+
+    if (!text && ['GET', 'POST', 'PUT', 'PATCH'].includes(req.method)) {
         return res.status(400).json({
             error: 'Texto não fornecido',
-            hint: 'Adicione ?text=SeuTextoAqui na URL'
+            hint: 'Envie "text" na query string (GET) ou no corpo JSON (POST)',
+            received: { query: req.query, body: req.body, method: req.method }
         });
     }
 
@@ -28,9 +41,10 @@ export default function handler(req, res) {
         original: text,
         processed: '',
         stats: {
-            charCount: text.length,
-            wordCount: text.split(/\s+/).filter(w => w.length > 0).length,
-            timestamp: new Date().toISOString()
+            charCount: text ? text.length : 0,
+            wordCount: text ? text.split(/\s+/).filter(w => w.length > 0).length : 0,
+            timestamp: new Date().toISOString(),
+            method: req.method
         }
     };
 
