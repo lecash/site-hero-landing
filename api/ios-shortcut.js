@@ -1,29 +1,23 @@
+// URL estável do ngrok (atualizar aqui quando reiniciar o ngrok)
+const NGROK_URL = process.env.PC_AGENT_URL || 'https://calibred-janay-revealable.ngrok-free.dev';
+
 export default async function handler(req, res) {
-    // CORS (Shortcuts / browser)
+    // CORS
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST.' });
 
-    // Só POST
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Método não permitido. Use POST.' });
-    }
-
-    // Auth Bearer
     const auth = req.headers.authorization || '';
     const secret = process.env.MY_SECRET_KEY;
     if (!secret || auth !== `Bearer ${secret}`) {
         return res.status(401).json({ error: 'Não autorizado.' });
     }
 
-    // Body
     const { action = 'ping', type = 'text', content = '' } = req.body || {};
-
     let message;
 
     switch (action) {
@@ -47,59 +41,42 @@ export default async function handler(req, res) {
             message = {
                 original: String(content),
                 charCount: String(content).length,
-                wordCount: String(content).trim()
-                    ? String(content).trim().split(/\s+/).length
-                    : 0,
+                wordCount: String(content).trim() ? String(content).trim().split(/\s+/).length : 0,
             };
             break;
 
         case 'run-pc': {
-            // Chama o agente local no PC via ngrok
-            const agentUrl = process.env.PC_AGENT_URL;
-            if (!agentUrl) {
-                return res.status(503).json({
-                    error: 'Agente PC não configurado.',
-                    hint: 'Configure a variável PC_AGENT_URL na Vercel com a URL do ngrok.',
-                });
-            }
             try {
-                const agentRes = await fetch(`${agentUrl}/run`, {
+                const agentRes = await fetch(`${NGROK_URL}/run`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'bypass-tunnel-reminder': 'true',
+                        'ngrok-skip-browser-warning': '1',
                     },
                     body: JSON.stringify({ cmd: content, secret }),
                 });
                 const agentData = await agentRes.json();
-                if (!agentRes.ok) {
-                    return res.status(agentRes.status).json(agentData);
-                }
+                if (!agentRes.ok) return res.status(agentRes.status).json(agentData);
                 message = agentData.output || agentData;
             } catch (err) {
                 return res.status(502).json({
-                    error: 'Não foi possível conectar ao agente PC.',
+                    error: 'Não foi possível conectar ao PC.',
                     detail: err.message,
-                    hint: 'Verifique se o agente está rodando e o ngrok está ativo.',
+                    url: NGROK_URL,
                 });
             }
             break;
         }
 
         case 'pc-ping': {
-            // Verifica se o agente PC está online
-            const agentUrl = process.env.PC_AGENT_URL;
-            if (!agentUrl) {
-                return res.status(503).json({ error: 'PC_AGENT_URL não configurada.' });
-            }
             try {
-                const pingRes = await fetch(`${agentUrl}/ping`, {
-                    headers: { 'bypass-tunnel-reminder': 'true' },
+                const pingRes = await fetch(`${NGROK_URL}/ping`, {
+                    headers: { 'ngrok-skip-browser-warning': '1' },
                 });
                 const pingData = await pingRes.json();
-                message = pingData.ok ? '✅ PC online!' : '❌ PC offline.';
+                message = pingData.ok ? `✅ PC online!` : '❌ PC offline.';
             } catch {
-                message = '❌ PC offline ou ngrok inativo.';
+                message = `❌ PC offline. (${NGROK_URL})`;
             }
             break;
         }
@@ -108,11 +85,5 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: `Ação desconhecida: ${action}` });
     }
 
-    return res.status(200).json({
-        success: true,
-        action,
-        type,
-        message,
-        timestamp: new Date().toISOString(),
-    });
+    return res.status(200).json({ success: true, action, type, message, timestamp: new Date().toISOString() });
 }
