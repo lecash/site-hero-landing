@@ -65,7 +65,10 @@ export default async function handler(req, res) {
             try {
                 const agentRes = await fetch(`${agentUrl}/run`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'bypass-tunnel-reminder': 'true',
+                    },
                     body: JSON.stringify({ cmd: content, secret }),
                 });
                 const agentData = await agentRes.json();
@@ -90,7 +93,9 @@ export default async function handler(req, res) {
                 return res.status(503).json({ error: 'PC_AGENT_URL não configurada.' });
             }
             try {
-                const pingRes = await fetch(`${agentUrl}/ping`);
+                const pingRes = await fetch(`${agentUrl}/ping`, {
+                    headers: { 'bypass-tunnel-reminder': 'true' },
+                });
                 const pingData = await pingRes.json();
                 message = pingData.ok ? '✅ PC online!' : '❌ PC offline.';
             } catch {

@@ -1,11 +1,13 @@
 import express from 'express';
 import { exec } from 'child_process';
+import ngrok from '@ngrok/ngrok';
 
 const app = express();
 app.use(express.json());
 
 const SECRET = process.env.AGENT_SECRET || 'biglion_fic4';
-const PORT = process.env.PORT || 3333;
+const PORT = 3333;
+const NGROK_TOKEN = process.env.NGROK_AUTHTOKEN || '39rUletKkQ8dFLXm6sQRjnXS2EA_59kaXGCMWSvHcTrPCs5mg';
 
 // Comandos permitidos (whitelist de segurança)
 const ALLOWED_COMMANDS = [
@@ -31,17 +33,14 @@ app.get('/ping', (req, res) => {
 app.post('/run', (req, res) => {
     const { cmd, secret } = req.body || {};
 
-    // Autenticação
     if (!secret || secret !== SECRET) {
         return res.status(401).json({ error: 'Não autorizado.' });
     }
 
-    // Validação do comando
     if (!cmd) {
         return res.status(400).json({ error: 'Comando não fornecido.' });
     }
 
-    // Verifica whitelist (segurança)
     const isAllowed = ALLOWED_COMMANDS.some(allowed =>
         cmd.toLowerCase().startsWith(allowed.toLowerCase())
     );
@@ -53,7 +52,6 @@ app.post('/run', (req, res) => {
         });
     }
 
-    // Executa o comando via PowerShell
     exec(`powershell -Command "${cmd}"`, { timeout: 10000 }, (err, stdout, stderr) => {
         if (err) {
             return res.status(500).json({ error: err.message, stderr });
@@ -67,9 +65,23 @@ app.post('/run', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
+// Inicia servidor e ngrok
+app.listen(PORT, async () => {
     console.log(`\n✅ Agente PC rodando em http://localhost:${PORT}`);
-    console.log(`   Ping: http://localhost:${PORT}/ping`);
-    console.log(`   Run:  POST http://localhost:${PORT}/run`);
-    console.log(`\n⚠️  Mantenha essa janela aberta enquanto usar pelo iPhone.\n`);
+
+    try {
+        const listener = await ngrok.forward({
+            addr: PORT,
+            authtoken: NGROK_TOKEN,
+        });
+        const url = listener.url();
+        console.log(`\n🌐 URL pública ngrok: ${url}`);
+        console.log(`\n👉 COPIE ESSA URL e configure na Vercel como PC_AGENT_URL`);
+        console.log(`   Comando: npx vercel env rm PC_AGENT_URL production --yes && echo "${url}" | npx vercel env add PC_AGENT_URL production`);
+        console.log(`\n⚠️  Mantenha essa janela aberta enquanto usar pelo iPhone.\n`);
+    } catch (err) {
+        console.error(`\n❌ ngrok falhou: ${err.message}`);
+        console.log(`   URL local apenas: http://localhost:${PORT}`);
+        console.log(`   Use localtunnel como alternativa: npx localtunnel --port ${PORT}\n`);
+    }
 });
