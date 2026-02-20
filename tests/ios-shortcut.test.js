@@ -97,7 +97,7 @@ describe("api/ios-shortcut.js", () => {
 
     expect(out.statusCode).toBe(204);
     expect(out.headers["access-control-allow-origin"]).toBe("https://example.com");
-    expect(out.headers.vary).toBe("Origin");
+    expect(out.headers["vary"]).toBe("Origin");
   });
 
   it("OPTIONS negado -> 204 sem headers de permissão e sem Vary", async () => {
@@ -112,7 +112,7 @@ describe("api/ios-shortcut.js", () => {
 
     expect(out.statusCode).toBe(204);
     expect(out.headers["access-control-allow-origin"]).toBeUndefined();
-    expect(out.headers.vary).toBeUndefined();
+    expect(out.headers["vary"]).toBeUndefined();
   });
 
   it("CORS-04 | POST origin permitida → 200 + ACAO + Vary: Origin (Bugfix)", async () => {
@@ -145,7 +145,7 @@ describe("api/ios-shortcut.js", () => {
 
     expect(out.statusCode).toBe(403);
     expect(out.jsonBody?.error).toBe("Origem não permitida");
-    expect(out.headers.vary).toBeUndefined();
+    expect(out.headers["vary"]).toBeUndefined();
   });
 
   it("método inválido retorna 405 antes de CORS", async () => {

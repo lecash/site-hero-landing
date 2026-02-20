@@ -7,10 +7,18 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node / build
 node_modules
 dist
 dist-ssr
+coverage
 *.local
+
+# Secrets / backups
+.env
+.env.*
+*.bak
+*.bak.*
 
 # Editor directories and files
 .vscode/*
@@ -24,4 +32,3 @@ dist-ssr
 *.sw?
 
 .vercel
-.env*.local
