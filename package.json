@@ -6,9 +6,25 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gate:syntax": "node -c api/ios-shortcut.js",
+    "gate:contamination": "node -e \"const fs=require('fs'); const c=fs.readFileSync('api/ios-shortcut.js','utf8'); const bad=['describe(','it(','expect(','vi.','vitest','beforeAll','afterEach','mockReqRes','makeReqRes']; for(const b of bad){ if(c.includes(b)){ console.error('GATE-Contamination FAIL:',b); process.exit(1);} }\"",
+    "gate:exports": "node -e \"const fs=require('fs'); const c=fs.readFileSync('api/ios-shortcut.js','utf8'); const m=(c.match(/export\\s+default/g)||[]).length; if(m!==1){ console.error('GATE-Exports FAIL: export default count =',m); process.exit(1);} \"",
+    "gate:auth": "node -e \"const fs=require('fs'); const c=fs.readFileSync('api/ios-shortcut.js','utf8'); if(!c.includes('timingSafeEqual')){ console.error('GATE-Auth FAIL: timingSafeEqual ausente'); process.exit(1);} if(/Authorization[^\\n]*===/.test(c) || /token[^\\n]*===/.test(c)){ console.error('GATE-Auth FAIL: comparação === detectada'); process.exit(1);} \"",
+    "gate:timeout": "node -e \"const fs=require('fs'); const c=fs.readFileSync('api/ios-shortcut.js','utf8'); if(!c.includes('AbortController') || !c.includes('3000')){ console.error('GATE-Timeout FAIL: AbortController/3000ms ausente'); process.exit(1);} \"",
+    "gate:safelog": "node -e \"const fs=require('fs'); const c=fs.readFileSync('api/ios-shortcut.js','utf8'); const stripped=c.replace(/function\\s+safeLog[\\s\\S]*?\\n}\\s*/m,''); if(stripped.includes('console.log')) { console.error('GATE-SafeLog FAIL: console.log vazado fora do safeLog'); process.exit(1); }\"",
+    "gates": "npm run gate:syntax && npm run gate:contamination && npm run gate:exports && npm run gate:auth && npm run gate:timeout && npm run gate:safelog",
+    "test": "npm run gates && vitest run"
   },
   "devDependencies": {
-    "vite": "^7.2.4"
+    "supertest": "^7.2.2",
+    "vite": "^7.2.4",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "@ngrok/ngrok": "^1.7.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "localtunnel": "^1.8.3"
   }
 }

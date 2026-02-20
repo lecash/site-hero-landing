@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comando Central</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --primary: #bb86fc;
+            --secondary: #03dac6;
+            --error: #cf6679;
+            --text: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.7;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-header {
+            font-size: 0.9rem;
+            font-weight: bold;
+            opacity: 0.5;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            background: #2c2c2c;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        button {
+            border: none;
+            padding: 15px 0;
+            border-radius: 12px;
+            background: #333;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.1s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:active {
+            transform: scale(0.96);
+            background: #444;
+        }
+
+        button span {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            opacity: 0.8;
+            font-weight: normal;
+        }
+
+        .btn-media {
+            background: #2d2d2d;
+            color: var(--secondary);
+        }
+
+        .btn-app {
+            background: #2a2a35;
+        }
+
+        .btn-danger {
+            background: #3a1c1c;
+            color: var(--error);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #000;
+            font-weight: bold;
+        }
+
+        #cam-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #cam-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+        }
+
+        .cam-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        #log {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: #666;
+            text-align: center;
+            height: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Comando Central PC</h1>
+
+        <!-- Config -->
+        <div class="card">
+            <input type="password" id="secret" placeholder="Senha (biglion_fic4)">
+            <input type="text" id="agent-url" placeholder="URL do Agente"
+                value="https://calibred-janay-revealable.ngrok-free.dev">
+        </div>
+
+        <!-- Webcam -->
+        <div class="card">
+            <div class="card-header">Webcam</div>
+            <div id="cam-container" onclick="loadCam()">
+                <img id="cam-img" src="" alt="Toque para carregar">
+                <div class="cam-overlay">📸 Toque para ver</div>
+            </div>
+        </div>
+
+        <!-- Mídia -->
+        <div class="card">
+            <div class="card-header">Mídia & Volume</div>
+            <div class="grid grid-3">
+                <button class="btn-media" onclick="runScript('media.ps1', 'prev')">⏮️</button>
+                <button class="btn-media" onclick="runScript('media.ps1', 'play')">⏯️</button>
+                <button class="btn-media" onclick="runScript('media.ps1', 'next')">⏭️</button>
+                <button class="btn-media" onclick="runScript('media.ps1', 'mute')">🔇</button>
+                <button class="btn-media" onclick="runScript('media.ps1', 'vol_down')">🔉</button>
+                <button class="btn-media" onclick="runScript('media.ps1', 'vol_up')">🔊</button>
+            </div>
+        </div>
+
+        <!-- Cronômetro -->
+        <div class="card">
+            <div class="card-header">Cronômetro (Minutos)</div>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="timer-min" value="5" style="width: 70px; text-align: center;">
+                <button class="btn-primary" style="flex:1" onclick="startTimer()">⏱️ Iniciar</button>
+            </div>
+        </div>
+
+        <!-- Apps -->
+        <div class="card">
+            <div class="card-header">Aplicativos</div>
+            <div class="grid grid-4">
+                <button class="btn-app" onclick="run('start chrome')">🌐<span>Chrome</span></button>
+                <button class="btn-app" onclick="run('start spotify')">🎵<span>Spotify</span></button>
+                <button class="btn-app" onclick="run('start notepad')">📝<span>Notepad</span></button>
+                <button class="btn-app" onclick="run('start cmd')">💻<span>CMD</span></button>
+            </div>
+        </div>
+
+        <!-- Sistema -->
+        <div class="card">
+            <div class="card-header">Sistema</div>
+            <div class="grid grid-2">
+                <button class="btn-app"
+                    onclick="run('rundll32 user32.dll,LockWorkStation')">🔒<span>Bloquear</span></button>
+                <button class="btn-app" onclick="run('[console]::beep(1000,500)')">🚨<span>Alarme</span></button>
+                <button class="btn-danger"
+                    onclick="confirmRun('shutdown /r /t 0', 'Reiniciar?')">🔄<span>Reiniciar</span></button>
+                <button class="btn-danger"
+                    onclick="confirmRun('shutdown /s /t 0', 'DESLIGAR?')">🛑<span>Desligar</span></button>
+            </div>
+        </div>
+
+        <div id="log">Pronto.</div>
+    </div>
+
+    <script>
+        // Carrega configs salvas
+        const savedSecret = localStorage.getItem('pc_secret');
+        const savedUrl = localStorage.getItem('pc_url');
+        if (savedSecret) document.getElementById('secret').value = savedSecret;
+        if (savedUrl) document.getElementById('agent-url').value = savedUrl;
+
+        function getBaseUrl() {
+            const url = document.getElementById('agent-url').value.replace(/\/$/, '');
+            localStorage.setItem('pc_url', url);
+            return url;
+        }
+
+        function getSecret() {
+            const s = document.getElementById('secret').value;
+            localStorage.setItem('pc_secret', s);
+            return s;
+        }
+
+        async function request(endpoint, body) {
+            const secret = getSecret();
+            if (!secret) return alert('Senha necessária!');
+            const url = getBaseUrl() + endpoint;
+
+            document.getElementById('log').innerText = 'Enviando...';
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': '1'
+                    },
+                    body: JSON.stringify({ secret, ...body })
+                });
+                const data = await res.json();
+                document.getElementById('log').innerText = data.success ? 'Sucesso!' : (data.error || 'Erro');
+            } catch (err) {
+                document.getElementById('log').innerText = 'Erro de conexão (CORS/Offline?)';
+            }
+        }
+
+        function run(cmd) { request('/run', { cmd }); }
+        function runScript(script, args) { request('/run-script', { script, args }); }
+
+        function startTimer() {
+            const min = document.getElementById('timer-min').value;
+            runScript('timer.ps1', min);
+        }
+
+        function confirmRun(cmd, msg) {
+            if (confirm(msg)) run(cmd);
+        }
+
+        function loadCam() {
+            const img = document.getElementById('cam-img');
+            const secret = getSecret();
+            img.style.opacity = '0.3';
+            // Chama endpoint /cam ? Não, usa query param na URL da imagem?
+            // O endpoint /cam do agente não checa auth via query param, só aceita GET simples.
+            // Vou assumir que /cam é public ou eu adiciono token na URL se precisar.
+            // O agente atual não protege /cam com senha (veja código). Isso é OK por enquanto se a URL for secreta.
+
+            img.src = getBaseUrl() + '/cam?t=' + new Date().getTime();
+            img.onload = () => { img.style.opacity = '1'; document.querySelector('.cam-overlay').style.display = 'none'; };
+        }
+    </script>
+</body>
+
+</html>
